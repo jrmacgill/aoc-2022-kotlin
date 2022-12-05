@@ -13,6 +13,6 @@ fun main(args: Array<String>) {
             count += num
         }
     }
-    println(counts.sortedDescending().slice(0..2).sum())
+    println(counts.sortedDescending().take(3).sum())
 
 }
