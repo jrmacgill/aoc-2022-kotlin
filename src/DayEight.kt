@@ -1,8 +1,5 @@
 import java.lang.Integer.max
 
-class DayEight {
-
-}
 
 fun testTree(i : Int, j : Int, data : Array<IntArray> ) : Int {
     val height = data[i][j]
@@ -44,7 +41,6 @@ fun testTreeScore(i : Int, j : Int, data : Array<IntArray> ) : Int {
 
 
 fun testDirScore(px : Int, py : Int, dx : Int, dy : Int, height : Int, data: Array<IntArray>) : Int {
-
     var x = px+dx
     var y = py+dy
     var distance = 0
@@ -56,14 +52,11 @@ fun testDirScore(px : Int, py : Int, dx : Int, dy : Int, height : Int, data: Arr
         y+=dy
 
     }
-    //println("found one")
     return distance
 }
 
 
 fun main() {
-    val day = DayEight()
-
     val lines = readInput("dayEight")
     val size = lines[0].length
     val data = Array(size) { IntArray(size) }
@@ -71,10 +64,11 @@ fun main() {
     lines.forEachIndexed { i, row -> row.forEachIndexed { j, tree -> data[i][j] = tree.digitToInt() } }
     var visible = 0
 
-    data.forEachIndexed{ i, row -> row.forEachIndexed{ j, tree -> visible += testTree(i, j, data) }}
-    println(visible)
+    val v = data.mapIndexed{ i, row -> row.mapIndexed{ j, tree -> testTree(i, j, data) }.sum()}.sum()
+    println(v)
 
     var best = 0
-    data.forEachIndexed{ i, row -> row.forEachIndexed{ j, tree -> best = max(best, testTreeScore(i, j, data)) }}
+    best = data.mapIndexed { i, row -> row.mapIndexed{ j, tree -> testTreeScore(i, j, data) }.max()}.max()
+
     println(best)
 }
