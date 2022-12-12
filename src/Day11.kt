@@ -1,29 +1,10 @@
 import java.io.File
 import java.lang.Math.floor
+import java.util.SortedSet
 
-class Monkey(val id : Long, val items: MutableList<Long>, val op: (old: Long) -> Long, val test : Long, val pass : Int, val fail : Int) {
+class Monkey(val id : Int, val items: MutableList<Int>, val op: (old: Int) -> Int, val test : Int, val pass : Int, val fail : Int) {
     var count = 0L
-    fun turn(others : HashMap<Int, Monkey>) {
-        println("Monkey " + id)
-        items.forEach(){
-            count++
-            //print("Pass item "+it)
 
-            var worry = op(it)
-            //worry = floor(worry/3.0).toLong()
-            worry = worry % (19*3*5*17*7*11*2*13)
-            //worry = worry % 746130*13
-
-            if (worry % test == 0L) {
-                others[pass]!!.items.add(worry)
-               // println(" to monkey " + pass + " pass")
-            } else {
-                others[fail]!!.items.add(worry)
-             //   println(" to monkey " + fail + " fail")
-            }
-        }
-        items.clear()
-    }
 }
 
 
@@ -41,11 +22,34 @@ class Day11 {
         }
     }
 
-    fun round() {
+    fun round(div : Float, prod : Int) {
         monkies.map { m ->
-            m.value.turn(monkies)
+            turn(m.value, div, prod) //monkies)
          }
-        print()
+       //rint()
+    }
+
+    fun turn(monkey : Monkey, div : Float, prod : Int) {
+
+
+        monkey.items.forEach(){
+            monkey.count++
+            //print("Pass item "+it)
+
+            var worry = monkey.op(it)
+            worry = kotlin.math.floor(worry / div).toInt()
+
+            worry = worry % prod
+
+            if (worry % monkey.test == 0) {
+                monkies[monkey.pass]!!.items.add(worry)
+                // println(" to monkey " + pass + " pass")
+            } else {
+                monkies[monkey.fail]!!.items.add(worry)
+                //   println(" to monkey " + fail + " fail")
+            }
+        }
+        monkey.items.clear()
     }
 
     fun go() {
@@ -63,18 +67,18 @@ class Day11 {
         monkies[6] = Monkey(6, mutableListOf(83, 68, 88, 55, 87, 67), { old -> old + 2}, 5, 2,1)
         monkies[7] = Monkey(7, mutableListOf(64, 81, 50, 96, 82, 53, 62, 92), { old -> old + 5}, 7, 3,0)
 
+        var prod =1
+        monkies.mapValues { m -> prod *= m.value.test; prod }
 
-
-        //var lines = readInput("dayTen")
-        //var data = File("src/dayTen.txt").readText()
-        //var list = regex.findAll(data).also {
-        //    it.forEach { println(it) }
-        //
-    //
-    // }
         for (i in 1..10000) {
-            round()
+            round(1F, prod)
         }
+        val result = monkies.values.map { v -> v.count }.sortedDescending().take(2).reduce{acc,i -> acc*i}
+        println(result)
+        for (i in 1..10000) {
+            round(1F, prod)
+        }
+
 
     }
 }
