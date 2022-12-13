@@ -1,0 +1,1 @@
+[Amazing AOC library from Zordid] (https://github.com/Zordid/adventofcode-kotlin-2022)
