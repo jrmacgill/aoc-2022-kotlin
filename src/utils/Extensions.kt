@@ -2,7 +2,13 @@
 
 package utils
 
+import kotlin.reflect.KClass
+
+
+
 class InfiniteList<T>(private val backingList: List<T>) : List<T> by backingList {
+
+
     init {
         require(backingList.isNotEmpty()) { "Cannot build an ${this::class.simpleName} from an empty list" }
     }
@@ -148,4 +154,41 @@ fun <T> Sequence<T>.runsOf(e: T): Sequence<Int> = runs().filter { it.first == e 
 fun <T> T.applyTimes(n: Int, f: (T) -> T): T = when (n) {
     0 -> this
     else -> f(this).applyTimes(n - 1, f)
+}
+
+private fun String.extractInt() = toIntOrNull() ?: sequenceContainedIntegers().first()
+
+private val numberRegex = Regex("(-+)?\\d+")
+private val positiveNumberRegex = Regex("\\d+")
+
+fun String.sequenceContainedIntegers(startIndex: Int = 0, includeNegativeNumbers: Boolean = true): Sequence<Int> =
+    (if (includeNegativeNumbers) numberRegex else positiveNumberRegex).findAll(this, startIndex)
+        .mapNotNull { m -> m.value.toIntOrNull() ?: warn("Number too large for Int: ${m.value}") }
+
+fun String.sequenceContainedLongs(startIndex: Int = 0, includeNegativeNumbers: Boolean = true): Sequence<Long> =
+    (if (includeNegativeNumbers) numberRegex else positiveNumberRegex).findAll(this, startIndex)
+        .mapNotNull { m -> m.value.toLongOrNull() ?: warn("Number too large for Long: ${m.value}") }
+
+fun String.extractAllIntegers(startIndex: Int = 0, includeNegativeNumbers: Boolean = true): List<Int> =
+    sequenceContainedIntegers(startIndex, includeNegativeNumbers).toList()
+
+fun String.extractAllLongs(startIndex: Int = 0, includeNegativeNumbers: Boolean = true): List<Long> =
+    sequenceContainedLongs(startIndex, includeNegativeNumbers).toList()
+
+
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T : Any> String.extractAllNumbers(
+    startIndex: Int = 0,
+    includeNegativeNumbers: Boolean = true,
+    klass: KClass<T> = T::class,
+): List<T> = when (klass) {
+    Int::class -> extractAllIntegers(startIndex, includeNegativeNumbers)
+    UInt::class -> extractAllIntegers(startIndex, false).map { it.toUInt() }
+    Long::class -> extractAllLongs(startIndex, includeNegativeNumbers)
+    ULong::class -> extractAllLongs(startIndex, false).map { it.toULong() }
+    else -> error("Cannot extract numbers of type ${klass.simpleName}")
+} as List<T>
+private fun <T> warn(msg: String): T? {
+    println(msg)
+    return null
 }
